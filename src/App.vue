@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h1>장소 페이지</h1>
+  <div id="app-root">
+    <router-view />
   </div>
 </template>
 
