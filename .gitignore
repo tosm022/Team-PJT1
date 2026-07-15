@@ -30,3 +30,12 @@ dist/
 .vscode/
 .DS_Store
 >>>>>>> e16e85360366ecb2376bd518928389cbfbb16e79
+
+# Project ignores
+node_modules/
+dist/
+.env
+.vscode/
+.DS_Store
+.idea/
+*.log
