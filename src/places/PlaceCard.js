@@ -1,6 +1,22 @@
-import tour from '../data/서울_관광지.json' assert { type: 'json' };
-import culture from '../data/서울_문화시설.json' assert { type: 'json' };
-import sports from '../data/서울_레포츠.json' assert { type: 'json' };
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+function loadJsonFile(name) {
+  try {
+    const p = join(__dirname, '..', 'data', name);
+    return JSON.parse(readFileSync(p, 'utf8'));
+  } catch (e) {
+    return null;
+  }
+}
+
+const tour = loadJsonFile('서울_관광지.json');
+const culture = loadJsonFile('서울_문화시설.json');
+const sports = loadJsonFile('서울_레포츠.json');
 
 const normalize = (data) => {
   if (!data) return [];
