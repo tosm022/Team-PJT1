@@ -21,6 +21,12 @@ const routes = [
   },
 
   {
+    path: '/community',
+    name: 'CommunityList',
+    component: () => import('./community/List.vue')
+  },
+
+  {
     path: '/community/write/:id?',
     name: 'CommunityWrite',
     component: () => import('./community/Write.vue')
@@ -30,12 +36,6 @@ const routes = [
     path: '/community/:id',
     name: 'CommunityDetail',
     component: () => import('./community/Detail.vue')
-  },
-
-  {
-    path: '/community',
-    name: 'CommunityList',
-    component: () => import('./community/List.vue')
   }
 
 ]
@@ -43,7 +43,7 @@ const routes = [
 
 const router = createRouter({
 
-  history:createWebHistory(),
+  history: createWebHistory(),
 
   routes
 
@@ -51,5 +51,5 @@ const router = createRouter({
 
 
 createApp(App)
-.use(router)
-.mount('#app')
+  .use(router)
+  .mount('#app')
