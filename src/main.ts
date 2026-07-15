@@ -15,12 +15,6 @@ const routes = [
   },
 
   {
-    path: '/place/:id?',
-    name: 'Place',
-    component: () => import('./pages/Place.vue')
-  },
-
-  {
     path: '/community/write/:id?',
     name: 'CommunityWrite',
     component: () => import('./community/Write.vue')

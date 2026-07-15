@@ -21,15 +21,11 @@ const router = createRouter({
       name:"CommunityList",
       component:CommunityList
     },
-
-
     {
       path:"/community/write",
       name:"CommunityWrite",
       component:CommunityWrite
     },
-
-
     {
       path:"/community/:id",
       name:"CommunityDetail",
