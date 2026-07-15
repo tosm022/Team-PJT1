@@ -13,7 +13,14 @@
       <div class="container">
         <h2 class="section-title">최신 게시글</h2>
         <div class="cards">
-          <PostCard v-for="post in posts" :post="post" :key="'new-' + post.id" />
+          <router-link
+            v-for="post in posts"
+            :key="'new-' + post.id"
+            :to="{ name: 'CommunityDetail', params: { id: post.id } }"
+            class="card-link"
+          >
+            <PostCard :post="post" />
+          </router-link>
         </div>
       </div>
     </section>
@@ -23,12 +30,21 @@
       <div class="container">
         <h2 class="section-title">좋아요 많은 게시글</h2>
         <div class="cards">
-          <PostCard v-for="post in popularPosts" :post="post" :key="'pop-' + post.id" />
+          <router-link
+            v-for="post in popularPosts"
+            :key="'pop-' + post.id"
+            :to="{ name: 'CommunityDetail', params: { id: post.id } }"
+            class="card-link"
+          >
+            <PostCard :post="post" />
+          </router-link>
         </div>
       </div>
     </section>
 
-    <button class="write-btn">글쓰기</button>
+    <router-link :to="{ name: 'CommunityWrite' }" class="write-link">
+      <button class="write-btn">글쓰기</button>
+    </router-link>
   </main>
 </template>
 
@@ -103,35 +119,19 @@ const popularPosts = ref([
   margin-bottom: 28px;
   border: 1px solid rgba(0,0,0,0.04);
 }
-.hero-title {
-  margin: 0 0 8px;
-  font-size: 28px;
-  font-weight: 700;
-  color: #1f6feb;
-}
-.hero-sub {
-  margin: 0;
-  font-size: 14px;
-  color: #4b5563;
-}
+.hero-title { margin: 0 0 8px; font-size: 28px; font-weight: 700; color: #1f6feb; }
+.hero-sub { margin: 0; font-size: 14px; color: #4b5563; }
 
 /* Section title */
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 8px 0 12px;
-  color: #222;
-}
+.section-title { font-size: 18px; font-weight: 700; margin: 8px 0 12px; color: #222; }
 
 /* Cards grid */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 18px;
-}
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 18px; }
 
-/* Write button placeholder */
+/* router-link wrapping card */
+.card-link { display: block; color: inherit; text-decoration: none; }
+
+/* Write button */
 .write-btn {
   position: fixed;
   right: 20px;
@@ -142,10 +142,11 @@ const popularPosts = ref([
   padding: 10px 14px;
   border-radius: 28px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-  cursor: default;
+  cursor: pointer;
 }
+.write-link { display: inline-block; }
 
-/* Responsive: single column on mobile */
+/* Responsive */
 @media (max-width: 740px) {
   .cards { grid-template-columns: 1fr; }
   .hero { padding: 28px 0; }
