@@ -1,9 +1,0 @@
-<template>
-  <div>
-    <h1>장소 페이지</h1>
-  </div>
-</template>
-
-<script setup lang="ts">
-
-</script>
