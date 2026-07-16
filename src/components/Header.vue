@@ -1,11 +1,9 @@
 <template>
   <header class="site-header">
-    <div class="left">
-      <div class="logo" role="img" aria-label="LocalHub 로고">
-        <span class="logo-mark">🏙️</span>
-        <span class="site-name">서울로그</span>
-      </div>
-    </div>
+    <router-link :to="{ name: 'Home' }" class="logo" aria-label="LocalHub 홈으로 이동">
+    <span class="logo-mark">🏙️</span>
+    <span class="site-name">서울로그</span>
+  </router-link>
 
     <nav class="nav" :class="{ open: mobileOpen }" aria-label="주 메뉴">
       <ul class="nav-list">
@@ -15,9 +13,6 @@
     </nav>
 
     <div class="right">
-      <button class="search-btn" @click="onSearch" aria-label="AI 장소 추천 챗봇 열기" title="AI 장소 추천">
-        <span class="search-icon" aria-hidden="true">✨</span>
-      </button>
 
       <button class="mobile-toggle" @click="toggleMobile" aria-label="메뉴 열기">
         <span class="bar" :class="{ active: mobileOpen }"></span>
@@ -29,7 +24,6 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { openChat } from '../chat/chatWidgetState'
 
 const router = useRouter()
 const mobileOpen = ref(false)
@@ -47,10 +41,6 @@ function onClick(target) {
   }
 }
 
-function onSearch() {
-  mobileOpen.value = false
-  openChat()
-}
 </script>
 
 <style scoped>
