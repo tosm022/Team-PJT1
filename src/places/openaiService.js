@@ -151,7 +151,7 @@ async function recommendWithOpenAI(places, userQuery) {
 
       {
         role: "user",
-        content: `사용자 요구: ${String(userQuery).trim()}\n\n후보 장소는 아래와 같다.\n\n${JSON.stringify(candidateList)}\n\n추천 기준\n- 사용자 요구 만족\n- 매력도\n- 접근성\n- 유명도\n\n반드시 상위 5개만 선택한다.`,
+        content: `사용자 요구: ${String(userQuery).trim()}\n\n후보 장소는 아래와 같다.\n\n${JSON.stringify(candidateList)}\n\n추천 기준\n- 사용자 요구 만족\n- 매력도\n- 접근성\n- 유명도\n\n반드시 상위 5개만 선택한다. 만약 매칭되는 후보 장소가 3개 미만(예: 1개만 매칭됨)이라면, 억지로 채우지 말고 실제로 매칭된 개수만큼만 반환한다.`,
       },
     ],
 

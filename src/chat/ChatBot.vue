@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { recommendPlaces } from '../places/openaiService.js'
 import { closeChat } from './chatWidgetState'
@@ -66,9 +66,47 @@ const router = useRouter()
 const input = ref('')
 const loading = ref(false)
 const messagesEl = ref<HTMLDivElement | null>(null)
-const messages = ref<ChatMessage[]>([
-  { role: 'assistant', text: '안녕하세요! 가고 싶은 지역을 알려주시면 어울리는 장소를 추천해드릴게요.' },
-])
+
+// 웰컴 메시지 정의
+const WELCOME_MESSAGE: ChatMessage = { 
+  role: 'assistant', 
+  text: '안녕하세요! 가고 싶은 지역을 알려주시면 어울리는 장소를 추천해드릴게요.' 
+}
+
+// 1. 초기값은 빈 배열로 두고, onMounted에서 복원합니다.
+const messages = ref<ChatMessage[]>([])
+const STORAGE_KEY = 'localhub_chat_messages'
+
+onMounted(() => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        messages.value = parsed as ChatMessage[]
+      } else {
+        // 저장된 기록이 비어 있다면 기본 웰컴 메시지 세팅
+        messages.value = [WELCOME_MESSAGE]
+      }
+    } else {
+      // 아예 로컬스토리지가 비어 있는 최초 진입 시에도 웰컴 메시지 세팅
+      messages.value = [WELCOME_MESSAGE]
+    }
+  } catch (e) {
+    // 파싱 에러 대처 및 기본 메시지 세팅
+    messages.value = [WELCOME_MESSAGE]
+  }
+  scrollToBottom()
+})
+
+// 2. 메시지가 변경될 때마다 안전하게 로컬 스토리지에 동기화
+watch(messages, (val) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(val))
+  } catch (e) {
+    console.error('채팅 히스토리 로컬 저장 실패:', e)
+  }
+}, { deep: true })
 
 function scrollToBottom() {
   nextTick(() => {
