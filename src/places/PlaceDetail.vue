@@ -75,7 +75,7 @@ async function fetchPlaceOverview(contentId: string) {
   apiError.value = ''
   
   // 💡 [필수 입력] 발급받으신 진짜 공공데이터포털 일반 인증키(Encoding Key)를 여기에 넣어주세요!
-  const serviceKey = "4732dbaf18f5efe8a5824b07fa95e838223a7ec738853aa861587a4714105ac6" 
+  const serviceKey = import.meta.env.VITE_TOUR_API_KEY || "4732dbaf18f5efe8a5824b07fa95e838223a7ec738853aa861587a4714105ac6";
   
   // CORS 에러 우회를 위한 Vite 프록시 주소(/api)와 최신 KorService2 규격 사용
   const url = `/api/B551011/KorService2/detailCommon2?serviceKey=${serviceKey}&MobileOS=ETC&MobileApp=LocalHub&_type=json&contentId=${contentId}`
