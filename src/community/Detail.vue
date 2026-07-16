@@ -112,7 +112,6 @@ post.place?.contentid
 
 >
 
-
 <button>
 
 같은 장소 게시글 보기
@@ -169,8 +168,6 @@ import {
 
 
 
-
-
 const route = useRoute()
 
 const router = useRouter()
@@ -185,135 +182,86 @@ Number(route.params.id)
 const post =
 ref<Post|null>(null)
 
-
-
-
 onMounted(()=>{
 
-
-post.value =
-getPostById(id)
-||
-null
-
+  post.value =
+  getPostById(id)
+  ||
+  null
 
 })
-
-
-
-
 
 const formattedDate =
 computed(()=>{
 
-
-return post.value
-
-?
-new Date(
-post.value.createdAt
-)
-.toLocaleString()
-
-:''
+  return post.value
+  ?
+  new Date(
+    post.value.createdAt
+  )
+  .toLocaleString()
+  :''
 })
-
-
-
-
-
 
 function like(){
 
+  if(!post.value) return
 
-if(!post.value)
-return
+  const updated = {
+    ...post.value,
+    likes: (post.value.likes || 0) + 1
+  }
 
-
-
-const updated = {
-
-...post.value,
-
-likes:
-(post.value.likes || 0)+1
-
+  updatePost(updated)
+  post.value = updated
 }
 
-
-updatePost(updated)
-
-post.value =
-updated
-
-
-}
-
-
-
-
-
-
-
+// 수정 전 비밀번호 확인: prompt로 입력받아 일치하면 이동
 function goEdit(){
 
+  if(!post.value) return
 
-router.push({
+  const input = window.prompt('비밀번호를 입력해 주세요.')
+  if (input === null) return // 취소
 
-name:'CommunityWrite',
-
-params:{
-
-id:post.value?.id
+  const stored = (post.value as any).password ?? ''
+  if (input === stored) {
+    router.push({
+      name:'CommunityWrite',
+      params:{
+        id: post.value.id
+      }
+    })
+  } else {
+    alert('비밀번호가 일치하지 않습니다.')
+  }
 
 }
-
-})
-
-
-}
-
-
-
-
-
-
 
 function remove(){
 
+  if(!post.value)
+  return
 
-if(!post.value)
-return
+  // 비밀번호 입력(prompt)
+  const input = window.prompt('비밀번호를 입력해 주세요.')
+  if (input === null) return // 취소한 경우 아무 동작도 하지 않음
 
+  const stored = (post.value as any).password ?? ''
+  if (input !== stored) {
+    alert('비밀번호가 일치하지 않습니다.')
+    return
+  }
 
+  // 비밀번호 일치 시 삭제 진행
+  deletePost(
+    post.value.id
+  )
 
-const confirmDelete =
-confirm(
-'정말 삭제하시겠습니까?'
-)
-
-
-
-if(!confirmDelete)
-return
-
-
-
-deletePost(
-post.value.id
-)
-
-
-
-router.push({
-
-name:'CommunityList'
-
-})
-
+  router.push({
+    name:'CommunityList'
+  })
 
 }
-
-
 
 </script>
