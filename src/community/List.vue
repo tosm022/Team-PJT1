@@ -57,6 +57,7 @@
             </td>
             <td class="col-place">
               <span v-if="post.place">📍 {{ post.place.title }}</span>
+              <span v-else>-</span>
             </td>
             <td class="col-likes">👍 {{ post.likes || 0 }}</td>
             <td class="col-date">{{ post.createdAt ? new Date(post.createdAt).toLocaleDateString() : '' }}</td>
@@ -211,8 +212,15 @@ const posts = computed(()=>{
 .col-date { width: 120px; text-align: right; color:#6b7280; }
 
 /* Title link style */
-.title-link { color: inherit; text-decoration: none; }
+/* Title link style */
+.title-link { color: inherit; text-decoration: none; display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .title-link:hover { text-decoration: underline; color: #0b69ff; }
+
+/* Row hover */
+.board-table tbody tr:hover { background: #f9fafb; }
+
+/* Remove underline for write link anchor */
+.control-row a { text-decoration: none; }
 
 /* Empty state */
 .empty { margin-top: 18px; color: #6b7280; }
@@ -225,7 +233,10 @@ const posts = computed(()=>{
 }
 @media (max-width: 520px) {
   .header-row { flex-direction: column; align-items: stretch; gap:10px; }
-  .actions { justify-content: space-between; }
+  /* Stack search and controls vertically on small screens */
+  .actions { flex-direction: column; align-items: stretch; gap:8px; }
+  .search-wrap { width: 100%; }
+  .control-row { width: 100%; justify-content: space-between; }
   .search-input { width: 100%; }
   .col-likes { display: none; }
   .col-no { width: 48px; font-size:13px; }

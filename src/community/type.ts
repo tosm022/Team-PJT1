@@ -20,6 +20,8 @@ export interface Post {
 
   author:string
 
+  password:string
+
   createdAt:string
 
   place?:PlaceTag
