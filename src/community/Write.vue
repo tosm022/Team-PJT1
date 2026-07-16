@@ -34,6 +34,19 @@
 
 
       <div>
+        <label>비밀번호 (수정/삭제용)</label>
+
+        <input
+          v-model="form.password"
+          type="password"
+          required
+          placeholder="비밀번호를 입력하세요"
+        />
+
+      </div>
+
+
+      <div>
         <label>내용</label>
 
         <textarea
@@ -271,6 +284,8 @@ const form =
 
     author:"",
 
+    password:"",
+
     place:undefined,
 
     likes:0
@@ -305,6 +320,10 @@ onMounted(()=>{
 
       form.author =
         post.author
+
+
+      form.password =
+        (post as any).password ?? ""
 
 
       form.place =
@@ -363,7 +382,13 @@ function selectPlace(place: any) {
 
 function submit(){
 
+  const trimmedPassword = (form.password ?? "").toString().trim()
+  if(!trimmedPassword){
+    alert('비밀번호를 입력해 주세요.')
+    return
+  }
 
+  form.password = trimmedPassword
 
   if(isEdit.value && id){
 

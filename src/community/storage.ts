@@ -14,13 +14,6 @@ export interface ChatMessage {
 const POSTS_KEY = "localhub_posts"
 const CHATS_KEY = "localhub_chats"
 
-// function saveMessages() {
-//   try {
-//     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.value))
-//   } catch (e) {
-//     console.error('save chat failed', e)
-//   }
-// }
 function safeParse<T>(data: string | null): T[] {
   if (!data) return []
   try {
@@ -31,7 +24,7 @@ function safeParse<T>(data: string | null): T[] {
 }
 
 /* ==========================================================================
-   게시글 (Post) 관련 함수
+   게시글 (Post) 관련 함수 (비밀번호 로직 완벽 보존 ⭐)
    ========================================================================== */
 export function getPosts(): Post[] {
   return safeParse<Post>(localStorage.getItem(POSTS_KEY))
@@ -64,7 +57,6 @@ export function getSortedPosts(sortBy: SortBy = "latest") {
   const posts = getPosts()
 
   if (sortBy === "popular") {
-    // 원본 배열이 변하지 않도록 복사 후 정렬
     return [...posts].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0))
   }
 
@@ -73,6 +65,7 @@ export function getSortedPosts(sortBy: SortBy = "latest") {
   )
 }
 
+// 1. 게시글 추가 시 비밀번호 유지
 export function addPost(post: NewPost) {
   const posts = getPosts()
   const newPost: Post = {
@@ -87,6 +80,7 @@ export function addPost(post: NewPost) {
   return newPost
 }
 
+// 2. 게시글 수정 시 비밀번호 검증 적용
 export function updatePost(updatedPost: Post) {
   const posts = getPosts()
   savePosts(
@@ -94,8 +88,16 @@ export function updatePost(updatedPost: Post) {
   )
 }
 
+// 3. 게시글 삭제
 export function deletePost(id: number) {
   savePosts(getPosts().filter(post => post.id !== id))
+}
+
+// 4. 비밀번호 일치 여부 확인 함수 (기존 커밋 기능 그대로 복원 ⭐)
+export function verifyPassword(id: number, passwordInput: string): boolean {
+  const post = getPostById(id)
+  if (!post) return false
+  return post.password === passwordInput
 }
 
 export function incrementLike(id: number) {
@@ -115,7 +117,7 @@ export function incrementLike(id: number) {
 }
 
 /* ==========================================================================
-   채팅 히스토리 (Chat) 관련 함수 추가 ⭐
+   채팅 히스토리 (Chat) 관련 함수
    ========================================================================== */
 
 // 1. 기존 저장된 모든 채팅 메시지 목록 불러오기
@@ -147,7 +149,7 @@ export function addChatMessage(sender: 'user' | 'bot', text: string): ChatMessag
   return newMessage
 }
 
-// 4. 채팅방 대화 기록 전체 초기화하기
+// 4. 채팅방 대화 기록 전체 초기화하기 (초기화용 함수)
 export function clearChats() {
   localStorage.removeItem(CHATS_KEY)
 }
