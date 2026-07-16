@@ -39,7 +39,7 @@ AI 챗봇을 통해 상황과 취향에 맞는 장소를 추천받으며,
 
 ### Frontend
 
-- Vue 3 (`<script setup>`)
+- Vue 3 (Composition API)
 - TypeScript
 - Vite
 - Vue Router
