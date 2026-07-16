@@ -1,13 +1,64 @@
-# 서울로그 (LocalHub)
+# 서울로그(SeoulLog)
 
-공공데이터(TourAPI 4.0) 기반으로 서울의 장소를 AI가 추천해주고, 사용자들이 방문 경험을 공유하는 지역 정보 커뮤니티입니다.
+> 공공데이터(TourAPI 4.0) 기반으로 서울의 장소를 AI가 추천해주고, 사용자들이 방문 경험을 공유하는 지역 정보 커뮤니티입니다. 
 
-- 프레임워크: Vue 3 (`<script setup>`) + TypeScript + Vite
-- 라우팅: Vue Router 5
-- 데이터 저장: 브라우저 `localStorage` (별도 백엔드 없음)
-- AI 추천: OpenAI API (`gpt-5-mini`, Structured Output)
+## 배포 링크
 
-## 시작하기
+> 배포 URL: 
+
+<!--
+아래에 실제 서비스 화면 캡처 또는 GIF를 추가하세요.
+
+예시:
+![LocalHub 메인 화면](./docs/main.png)
+![LocalHub 챗봇 시연](./docs/chatbot.gif)
+-->
+
+---
+
+## 프로젝트 소개
+
+서울에는 다양한 관광지와 문화시설 정보가 존재하지만,  
+장소 정보와 실제 방문자의 경험을 한 번에 확인하기는 어렵습니다.
+
+서울로그는 서울 공공데이터를 기반으로 장소를 탐색하고,  
+AI 챗봇을 통해 상황과 취향에 맞는 장소를 추천받으며,  
+해당 장소를 방문한 사용자의 경험을 익명 게시글로 확인할 수 있는 서비스입니다.
+
+### 핵심 사용자 흐름
+
+1. 홈에서 최신 게시글과 인기 게시글을 확인합니다.
+2. AI 챗봇에 원하는 장소나 활동을 자연어로 입력합니다.
+3. 챗봇이 서울 공공데이터에서 적합한 장소를 추천합니다.
+4. 추천 장소를 선택하면 해당 장소가 태그된 커뮤니티 게시글을 확인합니다.
+5. 사용자는 방문 장소를 태그하여 자신의 경험을 게시글로 공유합니다.
+
+---
+
+## 기술 스택
+
+### Frontend
+
+- Vue 3 (`<script setup>`)
+- TypeScript
+- Vite
+- Vue Router `[실제 설치 버전 확인]`
+
+### Data & Storage
+
+- TourAPI 4.0 기반 서울 공공데이터 JSON
+- Browser `localStorage`
+- 별도 백엔드 서버 없음
+
+### AI
+
+- OpenAI API
+- `gpt-5-mini`
+- Structured Output 기반 추천 결과 생성
+
+---
+
+## 실행 방법
 
 ```bash
 npm install
@@ -15,89 +66,57 @@ cp .env.example .env   # VITE_OPENAI_API_KEY 에 발급받은 키 입력
 npm run dev
 ```
 
-- `npm run build`: 타입 체크(`tsc`) 후 프로덕션 빌드
-- `npm run preview`: 빌드 결과 미리보기
+---
+
+## 구현한 기능
+
+- [x] 익명게시판 CRUD
+- [x] OpenAI API 기반 플로팅 챗봇 구현
+- [x] 장소 데이터 연동 및 장소 추천 기능
+- [x] 챗봇이 추천한 장소를 선택하면 해당 장소가 태그된 커뮤니티 게시글을 조회할 수 있도록 장소와 게시글을 연계
+- [x] Vue.js 3 기반 SPA 및 localStorage 데이터 저장 구조로 구현하고 Netlify에 배포하여 외부 접근 가능한 URL 제공
+- [x] 프론트엔드 구현
+- [x] AI 추천 이유 생성
+- [ ] 좋아요, 댓글 기능 (댓글 기능 미완성)
+- [ ] 게시글 이미지 첨부 (미완성)
+      
+---
 
 ## 폴더 구조
 
-```
-travel-project/
-├── .env.example            # 필요한 환경변수 목록 (실제 값은 .env에 직접 입력, git 미포함)
-├── index.html               # Vite 진입 HTML, #app 마운트 지점
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── src/
-    ├── main.ts               # 앱 부트스트랩: style.css 로드, App 마운트, router 연결
-    ├── App.vue                # 최상위 레이아웃: Header + <router-view> + Footer + ChatWidget
-    ├── style.css               # 전역 CSS 변수(색상·테두리) 및 공통 엘리먼트/유틸리티 스타일
-    ├── vite-env.d.ts            # Vite 클라이언트 타입 + *.vue 모듈 타입 선언(shim)
-    │
-    ├── router/
-    │   └── index.ts             # 전체 라우트 테이블 (단일 라우터, 아래 "라우트 목록" 참고)
-    │
-    ├── pages/
-    │   └── Home.vue              # 홈 화면: 히어로 CTA, 최신/인기 게시글 3개씩 미리보기
-    │
-    ├── components/
-    │   ├── Header.vue             # 상단 고정(sticky) 헤더: 로고, 홈/커뮤니티 내비게이션, AI 챗봇 여는 버튼
-    │   ├── Footer.vue             # 하단 푸터: 브랜드 소개, 카피라이트 (정적)
-    │   └── PostCard.vue           # 게시글 미리보기 카드 (제목/요약/태그/날짜/좋아요), 홈 화면에서 사용
-    │
-    ├── community/                # 커뮤니티(게시판) 기능 — localStorage CRUD
-    │   ├── type.ts                 # Post/NewPost/SortBy/PlaceTag/Recommendation 타입 정의
-    │   ├── storage.ts               # localStorage 기반 CRUD: getPosts/addPost/updatePost/deletePost/
-    │   │                            #   getPostById/getPostsByContentId/getSortedPosts/incrementLike
-    │   ├── List.vue                 # 게시글 목록: 최신순/인기순 정렬, contentid로 특정 장소 관련 글만 필터링
-    │   ├── Write.vue                # 게시글 작성/수정 폼, 장소 검색·태그 지정,
-    │   │                            #   URL 쿼리 placeId로 진입 시 장소 자동 태그(AI 추천 → 글쓰기 연동)
-    │   └── Detail.vue               # 게시글 상세: 좋아요, 수정/삭제, "같은 장소 게시글 보기" 이동
-    │
-    ├── places/                    # 장소 데이터 + AI 추천 엔진
-    │   ├── PlaceCard.js              # data/*.json 3종을 병합해 allPlaces 배열 생성,
-    │   │                              #   getPlaceByContentId(id)로 단건 조회
-    │   ├── openaiService.js          # AI 추천 로직: filterPlaces(지역 필터) → topN(최신순 추출)
-    │   │                              #   → OpenAI Structured Output 호출(recommendWithOpenAI)
-    │   │                              #   → recommendPlaces()가 전체 파이프라인 실행 후 점수순 정렬 반환
-    │   └── PlaceDetail.vue           # 장소 상세 페이지: allPlaces에서 조회, 관련 게시글 보기/
-    │                                  #   이 장소로 글쓰기 버튼, 이미지 없을 시 플레이스홀더 처리
-    │
-    ├── chat/                      # 우하단 플로팅 AI 챗봇 위젯
-    │   ├── chatWidgetState.ts        # 위젯 열림/닫힘 공유 상태(모듈 전역 ref) + openChat/closeChat/toggleChat
-    │   ├── ChatBot.vue                # 채팅 패널 내부: 메시지 스레드, 지역 입력 → recommendPlaces 호출,
-    │   │                               #   추천 카드 렌더링, 카드 클릭 시 위젯 닫고 PlaceDetail로 이동
-    │   └── ChatWidget.vue             # 우하단 원형 FAB 버튼 + 펼쳐지는 채팅 패널(헤더/닫기 버튼),
-    │                                   #   App.vue에 비동기 컴포넌트로 전역 마운트
-    │
-    └── data/                      # TourAPI 원본 수집 데이터 (공공누리 제3유형)
-        ├── 서울_관광지.json           # 관광지 783건
-        ├── 서울_문화시설.json          # 문화시설 566건
-        ├── 서울_레포츠.json            # 레포츠 126건
-        ├── SCHEMA.md                  # 원본 JSON 필드 정의 (contentid, addr1, mapx/mapy 등)
-        └── SOURCE.md                  # 데이터 출처(한국관광공사)·라이선스·출처 표기 안내
-```
+- `src/App.vue`, `src/main.ts`, `src/router/`: 공통 레이아웃, 애플리케이션 실행 및 페이지 라우팅 설정
+- `src/pages/`, `src/components/`: 홈 화면과 Header·Footer·PostCard 등 공통 UI 컴포넌트
+- `src/community/`: 게시글 CRUD, localStorage 저장, 장소 태그 및 관련 게시글 조회
+- `src/places/`, `src/chat/`, `src/data/`: 장소 데이터·AI 추천 로직, 플로팅 챗봇 UI, TourAPI 기반 서울 공공데이터
 
-## 라우트 목록 (`src/router/index.ts`)
+---
 
-| 경로 | 이름 | 컴포넌트 | 설명 |
-|------|------|----------|------|
-| `/` | `Home` | `pages/Home.vue` | 홈 |
-| `/place/:contentid` | `PlaceDetail` | `places/PlaceDetail.vue` | 장소 상세 (AI 추천 카드 클릭 시 이동) |
-| `/community` | `CommunityList` | `community/List.vue` | 게시글 목록 |
-| `/community/write/:id?` | `CommunityWrite` | `community/Write.vue` | 게시글 작성(`id` 없음) / 수정(`id` 있음) |
-| `/community/:id` | `CommunityDetail` | `community/Detail.vue` | 게시글 상세 |
+## 팀 구성 및 역할
 
-## 핵심 데이터 흐름
+| 팀원 | 담당 영역 |
+|---|---|
+| 김서현 | 챗봇/AI 추천 기능 | 
+| 박단영 | 커뮤니티 기능 | 
+| 노유진 | UI·UX 및 화면 구성 |
 
-1. **AI 추천**: `Header`의 ✨ 버튼 또는 `Home`의 "AI 추천받기" 버튼 → `chatWidgetState.openChat()` → `ChatWidget`이 패널 표시 → `ChatBot`에서 지역 입력 → `openaiService.recommendPlaces()`가 `PlaceCard.allPlaces`(로컬 JSON)를 지역명으로 필터링 후 OpenAI에 후보를 넘겨 상위 5곳 추천 → 카드 클릭 시 `PlaceDetail`로 이동.
-2. **게시글 작성 ↔ 장소 태깅**: `PlaceDetail`의 "이 장소로 글쓰기" → `CommunityWrite`에 `?placeId=` 쿼리로 진입 → `Write.vue`가 `getPlaceByContentId`로 장소를 자동 태그. 직접 검색해 태그하는 것도 가능(`PlaceCard.allPlaces` 기반 자동완성).
-3. **커뮤니티 데이터**: 모든 게시글은 `community/storage.ts`를 통해 브라우저 `localStorage`(`localhub_posts` 키)에 저장·조회되며, 백엔드 서버는 없습니다. `Home`은 `getSortedPosts('latest'|'popular')`로 최신/인기 글을 가져와 미리보기로 노출합니다.
-4. **관련 게시글 보기**: 게시글의 태그된 장소 또는 `PlaceDetail`에서 "관련 게시글 보기" 클릭 시 `CommunityList`에 `?contentid=` 쿼리로 이동, 해당 장소가 태그된 글만 필터링합니다.
 
-## 환경변수
+---
 
-| 변수 | 설명 |
-|------|------|
-| `VITE_OPENAI_API_KEY` | AI 장소 추천(챗봇)에서 사용하는 OpenAI API 키. `.env`에 설정하며 `openaiService.js`가 지연 생성 방식으로 클라이언트를 초기화합니다(키가 없어도 페이지 자체는 정상 렌더링). |
+## 협업 방식 / 팀 그라운드 룰
 
-TourAPI 서비스 키는 필요 없습니다 — `src/data/*.json`에 미리 수집된 데이터만 사용합니다.
+- 담당 기능별 feature 브랜치에서 작업하고 기능 단위로 커밋한 뒤 Pull Request를 통해 main에 병합했습니다.
+- 장소 데이터 연결 기준인 `contentid`는 문자열로 통일하고, 핵심 기능을 완료한 뒤 추가 기능을 개발했습니다.
+- 공유가 필요한 내용은 Mattermost를 통해 전달하고, 궁금한 점은 바로 질문하며 빠르게 해결했습니다.
+
+---
+
+## 트러블슈팅
+- API 키 호출
+    env 파일을 읽지 못함
+---
+
+## 추가 개선사항
+- 댓글 기능 구현
+- Footer 위치 고정
+- 챗봇 히스토리 기능 구현
+
