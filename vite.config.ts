@@ -5,12 +5,12 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      // 주소창에 /api로 시작하는 요청을 공공데이터포털 주소로 프록시(우회) 시켜줍니다.
+      // 브라우저가 /api/ 로 요청하면 로컬 개발 서버가 https://apis.data.go.kr 로 대신 요청을 보냅니다.
       '/api': {
         target: 'https://apis.data.go.kr',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: false, // SSL 인증서 무시
+        secure: false,
       }
     }
   }
