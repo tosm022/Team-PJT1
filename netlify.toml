@@ -1,0 +1,20 @@
+# 1. 빌드할 때 Netlify 대시보드에 등록된 VITE_TOUR_API_KEY 환경 변수를 강제로 전달합니다.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_TOUR_API_KEY = "VITE_TOUR_API_KEY"
+
+# 2. API 요청 (/api/*)은 공공데이터포털로 안전하게 중계 (CORS 우회)
+[[redirects]]
+  from = "/api/*"
+  to = "https://apis.data.go.kr/:splat"
+  status = 200
+  force = true
+
+# 3. 사용자가 새로고침을 하거나 특정 페이지로 직접 접속 시 404가 뜨지 않게 index.html로 라우팅 (SPA 라우팅 해결)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
