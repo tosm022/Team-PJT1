@@ -168,7 +168,8 @@ import {
 
 
 import {
-  allPlaces
+  allPlaces,
+  getPlaceByContentId
 } from "../places/PlaceCard"
 
 
@@ -291,6 +292,42 @@ onMounted(()=>{
 
       form.likes =
         post.likes ?? 0
+
+
+    }
+
+
+  }
+  else if(route.query.placeId){
+
+
+    const place =
+      getPlaceByContentId(
+        route.query.placeId as string
+      )
+
+
+    if(place){
+
+
+      form.place = {
+
+        contentid:
+          String(
+            place.contentid
+            ||
+            place.contentId
+          ),
+
+        title:
+          place.title,
+
+        address:
+          place.addr1
+          ||
+          ""
+
+      }
 
 
     }

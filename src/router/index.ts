@@ -1,44 +1,43 @@
-import { createRouter, createWebHistory } from "vue-router"
-
-import CommunityList from "@/community/List.vue"
-import CommunityDetail from "@/community/Detail.vue"
-import CommunityWrite from "@/community/Write.vue"
-
+import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
 
-  history:createWebHistory(),
+  history: createWebHistory(),
 
-  routes:[
+  routes: [
 
     {
-      path:"/",
-      redirect:"/community"
+      path: '/',
+      name: 'Home',
+      component: () => import('../pages/Home.vue')
     },
 
     {
-      path:"/community",
-      name:"CommunityList",
-      component:CommunityList
+      path: '/place/:contentid',
+      name: 'PlaceDetail',
+      component: () => import('../places/PlaceDetail.vue')
     },
 
-
     {
-      path:"/community/write",
-      name:"CommunityWrite",
-      component:CommunityWrite
+      path: '/community',
+      name: 'CommunityList',
+      component: () => import('../community/List.vue')
     },
 
+    {
+      path: '/community/write/:id?',
+      name: 'CommunityWrite',
+      component: () => import('../community/Write.vue')
+    },
 
     {
-      path:"/community/:id",
-      name:"CommunityDetail",
-      component:CommunityDetail
+      path: '/community/:id',
+      name: 'CommunityDetail',
+      component: () => import('../community/Detail.vue')
     }
 
   ]
 
 })
-
 
 export default router

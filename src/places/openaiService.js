@@ -1,420 +1,200 @@
 import OpenAI from "openai";
 import { allPlaces } from "./PlaceCard.js";
 
+// -----------------------------
+// OpenAI Client (지연 생성: 키가 없을 때 모듈 로드 자체가 깨지지 않도록)
+// -----------------------------
+let client = null;
 
-const COMPANION_MAP = {
-
-  family: new Set(["12", "14", "39"]),
-
-  friends: new Set(["28", "39"]),
-
-  alone: new Set(["28", "14", "39"]),
-
-  couple: new Set(["14", "39"])
-
-};
-
-
-
-// 지역 + 동행자 필터
-
-export function filterPlaces({
-  region,
-  companion
-}) {
-
-
-  if (!region || !companion) {
-
-    return [];
-
+function getClient() {
+  if (!client) {
+    client = new OpenAI({
+      apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+      dangerouslyAllowBrowser: true,
+    });
   }
-
-
-  const typeSet =
-    COMPANION_MAP[companion];
-
-
-  if (!typeSet) {
-
-    return [];
-
-  }
-
-
-
-  const regionLower =
-    region.toLowerCase();
-
-
-
-  return allPlaces.filter(place => {
-
-
-    const addr =
-      (
-        place.addr1 || ""
-      )
-      .toLowerCase();
-
-
-
-    const contentType =
-      String(
-        place.contenttypeid
-        ||
-        place.contentTypeId
-        ||
-        ""
-      );
-
-
-
-    return (
-
-      addr.includes(regionLower)
-
-      &&
-
-      typeSet.has(contentType)
-
-    );
-
-
-  });
-
-
+  return client;
 }
 
+// -----------------------------
+// 지역 필터
+// -----------------------------
+export function filterPlaces({ region }) {
+  if (!region) return [];
 
+  const keyword = region.trim().toLowerCase();
 
+  return allPlaces.filter((place) =>
+    (place.addr1 || "").toLowerCase().includes(keyword)
+  );
+}
 
-
-// 후보 Top N
-
-export function topN(
-  candidates,
-  n = 20
-){
-
-  if(
-    !Array.isArray(candidates)
-    ||
-    candidates.length === 0
-  ){
-
-    return [];
-
-  }
-
-
+// -----------------------------
+// 최신순 후보 추출
+// -----------------------------
+export function topN(candidates, n = 20) {
+  if (!Array.isArray(candidates)) return [];
 
   return [...candidates]
-    .slice(0,n);
-
-
+    .sort((a, b) => {
+      const ta = Number(a.modifiedtime || a.createdtime || 0);
+      const tb = Number(b.modifiedtime || b.createdtime || 0);
+      return tb - ta;
+    })
+    .slice(0, n);
 }
 
+// -----------------------------
+// OpenAI 추천
+// -----------------------------
+async function recommendWithOpenAI(places) {
+  const candidateList = places.map((p) => ({
+    contentid: String(p.contentid),
+    title: p.title,
+    address: p.addr1 || "",
+    description:
+      p.overview ||
+      p.tel ||
+      "서울의 관광 명소입니다.",
+  }));
 
+  const response = await getClient().responses.create({
+    model: "gpt-5-mini",
 
+    input: [
+      {
+        role: "system",
+        content: `
+당신은 서울 여행 전문가이다.
 
+사용자가 가장 만족할 만한 장소 5개를 추천한다.
 
-// OpenAI 장소 평가
+반드시 JSON만 출력한다.
+`,
+      },
 
-async function scorePlaceWithOpenAI(
+      {
+        role: "user",
+        content: `
+후보 장소는 아래와 같다.
 
-  place,
+${JSON.stringify(candidateList)}
 
-  {
+추천 기준
 
-    apiKey,
+- 여행 매력도
+- 유명도
+- 접근성
+- 다양한 연령이 만족할 가능성
 
-    companion,
+반드시 상위 5개만 선택한다.
+`,
+      },
+    ],
 
-    model="gpt-5-nano"
+    text: {
+      format: {
+        type: "json_schema",
 
-  }={}
+        name: "travel_recommend",
 
-){
+        strict: true,
 
+        schema: {
+          type: "object",
 
+          properties: {
+            recommendations: {
+              type: "array",
 
-  const client =
-    new OpenAI({
+              minItems: 5,
 
-      apiKey,
+              maxItems: 5,
 
-      dangerouslyAllowBrowser:true
+              items: {
+                type: "object",
 
-    });
+                properties: {
+                  contentid: {
+                    type: "string",
+                  },
 
+                  score: {
+                    type: "integer",
+                    minimum: 0,
+                    maximum: 100,
+                  },
 
+                  reason: {
+                    type: "string",
+                  },
+                },
 
+                required: [
+                  "contentid",
+                  "score",
+                  "reason",
+                ],
 
-  const prompt = `
-
-너는 서울 여행 추천 AI이다.
-
-사용자는 ${companion}와 함께 여행할 장소를 찾고 있다.
-
-아래 장소를 평가해라.
-
-
-장소명:
-${place.title}
-
-
-주소:
-${place.addr1}
-
-
-반드시 JSON만 반환:
-
-{
-"contentid":"장소ID",
-"score":0~100 숫자,
-"reason":"추천 이유"
-}
-
-`;
-
-
-
-
-  try{
-
-
-    const response =
-      await client.chat.completions.create({
-
-        model,
-
-
-        messages:[
-
-          {
-            role:"system",
-
-            content:
-            "한국 여행 추천 전문가"
-
+                additionalProperties: false,
+              },
+            },
           },
 
+          required: ["recommendations"],
 
-          {
-
-            role:"user",
-
-            content:prompt
-
-          }
-
-        ],
-
-
-
-        response_format:{
-
-          type:"json_object"
-
+          additionalProperties: false,
         },
+      },
+    },
+  });
 
-
-
-        temperature:0
-
-      });
-
-
-
-
-
-    const result =
-      JSON.parse(
-
-        response
-        .choices[0]
-        .message
-        .content
-
-      );
-
-
-
-
-
-    return {
-
-
-      contentid:
-        String(
-          result.contentid
-        ),
-
-
-      score:
-        Number(
-          result.score
-        ),
-
-
-      reason:
-        result.reason
-
-
-
-    };
-
-
-
-  }
-
-  catch(error){
-
-
-    return {
-
-
-      contentid:
-        String(
-          place.contentid
-          ||
-          place.contentId
-        ),
-
-
-      score:50,
-
-
-      reason:
-        "AI 추천 실패"
-
-
-
-    };
-
-
-  }
-
-
+  return JSON.parse(response.output_text).recommendations;
 }
 
-
-
-
-
-
-
-// 최종 추천 함수
-
+// -----------------------------
+// 메인 추천 함수
+// -----------------------------
 export async function recommendPlaces({
-
   region,
-
-  companion,
-
-  apiKey,
-
-  options={}
-
-
-}){
-
-
-  const candidates =
-    filterPlaces({
-
-      region,
-
-      companion
-
-    });
-
-
-
-  if(
-    candidates.length===0
-  ){
-
-    return [];
-
+}) {
+  if (!region) {
+    throw new Error("region is required");
   }
 
+  const filtered = filterPlaces({
+    region,
+  });
 
+  if (filtered.length === 0) {
+    return [];
+  }
 
-  const targets =
-    topN(
-      candidates,
-      20
-    );
+  const candidates = topN(filtered, 20);
 
+  const aiResult =
+    await recommendWithOpenAI(candidates);
 
-
-
-  const results=[];
-
-
-
-
-  for(
-    const place of targets
-  ){
-
-
-
-    const score =
-      await scorePlaceWithOpenAI(
-
-        place,
-
-        {
-
-          apiKey,
-
-          companion,
-
-          model:
-          options.model
-
-        }
-
+  const finalResult = aiResult
+    .map((item) => {
+      const place = candidates.find(
+        (p) =>
+          String(p.contentid) ===
+          String(item.contentid)
       );
 
+      if (!place) return null;
 
+      return {
+        ...place,
 
-    results.push({
+        score: item.score,
 
-      ...place,
+        reason: item.reason,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
 
-      score:
-        score.score,
-
-
-      reason:
-        score.reason
-
-
-    });
-
-
-  }
-
-
-
-
-
-
-  return results
-
-    .sort(
-
-      (a,b)=>
-        b.score-a.score
-
-    )
-
-    .slice(0,5);
-
-
-
+  return finalResult;
 }
